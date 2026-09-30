@@ -13,6 +13,8 @@ GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
 
 # Yapay Zeka Motorunu (Gemini) Başlatma
 genai.configure(api_key=GEMINI_API_KEY)
+
+# Hata vermeyen en stabil modele geçiş yapıldı
 model = genai.GenerativeModel('gemini-pro')
 
 oyun_adi = st.text_input("Oyun Adı (Örn: Minecraft, Roblox, Valorant, Chivalry 2):")
