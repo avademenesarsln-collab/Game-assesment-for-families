@@ -13,7 +13,7 @@ GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
 
 # Yapay Zeka Motorunu (Gemini) Başlatma
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = genai.GenerativeModel('gemini-pro')
 
 oyun_adi = st.text_input("Oyun Adı (Örn: Minecraft, Roblox, Valorant, Chivalry 2):")
 
