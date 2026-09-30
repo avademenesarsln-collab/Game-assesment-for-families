@@ -7,7 +7,7 @@ st.set_page_config(page_title="Oyun Güvenlik Radarı", page_icon="🛡️")
 st.title("🛡️ Dijital Oyun Güvenlik Radarı")
 st.write("Çocuğunuzun oynadığı oyunu aratın, pedagojik ve hukuki risk raporunu anında görün.")
 
-# ÖNEMLİ: Anahtarları koddan değil, Streamlit'in güvenli kasasından çekiyoruz!
+# Şifreler Streamlit Secrets üzerinden çekiliyor
 RAWG_API_KEY = st.secrets["RAWG_API_KEY"]
 client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
@@ -34,17 +34,24 @@ if st.button("Risk Raporu Oluştur"):
                 Ebeveynler için OYUNUN İÇERİĞİ, KÜRESEL İDDİALAR ve EBEVEYN TAVSİYESİ başlıklarında net, anlaşılır ve Türkçe bir rapor hazırla.
                 """
 
-                chat_completion = client.chat.completions.create(
-                    messages=[
-                        {"role": "system", "content": "Sen ebeveynleri dijital oyun risklerine karşı bilgilendiren bir asistansın."},
-                        {"role": "user", "content": prompt}
-                    ],
-                    model="qwen/qwen3.8-27b",
-                    temperature=0.3,
-                    max_tokens=2048,
-                )
+                # Hata yakalama bloğu başlıyor
+                try:
+                    chat_completion = client.chat.completions.create(
+                        messages=[
+                            {"role": "system", "content": "Sen ebeveynleri dijital oyun risklerine karşı bilgilendiren bir asistansın."},
+                            {"role": "user", "content": prompt}
+                        ],
+                        model="qwen/qwen3.8-27b",
+                        temperature=0.3,
+                        max_tokens=2048,
+                    )
+                    
+                    st.success(f"{tam_isim} ({yas_siniri}) için rapor başarıyla oluşturuldu!")
+                    st.markdown(chat_completion.choices[0].message.content)
                 
-                st.success(f"{tam_isim} ({yas_siniri}) için rapor başarıyla oluşturuldu!")
-                st.markdown(chat_completion.choices[0].message.content)
+                # Eğer Groq API hata verirse, hatanın tam metnini ekrana yazdıracak
+                except Exception as e:
+                    st.error(f"Yapay Zeka API Hatası: {e}")
+                    
     else:
         st.warning("Lütfen aramak istediğiniz oyunun adını yazın.")
