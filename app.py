@@ -15,7 +15,7 @@ GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=GEMINI_API_KEY)
 
 # Listenden aldığımız en güncel ve süper hızlı model!
-model = genai.GenerativeModel('gemini-2.5-flash')
+model = genai.GenerativeModel('gemini-3.8-flash')
 
 oyun_adi = st.text_input("Oyun Adı (Örn: Minecraft, Roblox, Valorant, Chivalry 2):")
 
