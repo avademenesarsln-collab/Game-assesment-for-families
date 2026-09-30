@@ -1,6 +1,6 @@
 import streamlit as st
 import requests
-from groq import Groq
+import google.generativeai as genai
 
 st.set_page_config(page_title="Oyun Güvenlik Radarı", page_icon="🛡️")
 
@@ -9,12 +9,11 @@ st.write("Çocuğunuzun oynadığı oyunu aratın, pedagojik ve hukuki risk rapo
 
 # Şifreler Streamlit Secrets üzerinden çekiliyor
 RAWG_API_KEY = st.secrets["RAWG_API_KEY"]
+GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
 
-# 403 Hatasını aşmak için eklediğimiz tarayıcı kimliği (User-Agent) hilesi
-client = Groq(
-    api_key=st.secrets["GROQ_API_KEY"],
-    default_headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
-)
+# Yapay Zeka Motorunu (Gemini) Başlatma
+genai.configure(api_key=GEMINI_API_KEY)
+model = genai.GenerativeModel('gemini-1.5-flash')
 
 oyun_adi = st.text_input("Oyun Adı (Örn: Minecraft, Roblox, Valorant, Chivalry 2):")
 
@@ -41,20 +40,17 @@ if st.button("Risk Raporu Oluştur"):
 
                 # Hata yakalama bloğu
                 try:
-                    chat_completion = client.chat.completions.create(
-                        messages=[
-                            {"role": "system", "content": "Sen ebeveynleri dijital oyun risklerine karşı bilgilendiren bir asistansın."},
-                            {"role": "user", "content": prompt}
-                        ],
-                        model="qwen/qwen3.8-27b",
-                        temperature=0.3,
-                        max_tokens=2048,
+                    response = model.generate_content(
+                        prompt,
+                        generation_config=genai.types.GenerationConfig(
+                            temperature=0.3,
+                            max_output_tokens=2048,
+                        )
                     )
                     
                     st.success(f"{tam_isim} ({yas_siniri}) için rapor başarıyla oluşturuldu!")
-                    st.markdown(chat_completion.choices[0].message.content)
+                    st.markdown(response.text)
                 
-                # Eğer Groq API yine bir güvenlik duvarına takılırsa hatayı ekrana basacak
                 except Exception as e:
                     st.error(f"Yapay Zeka API Hatası: {e}")
                     
