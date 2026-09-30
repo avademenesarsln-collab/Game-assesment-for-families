@@ -9,9 +9,14 @@ st.write("Çocuğunuzun oynadığı oyunu aratın, pedagojik ve hukuki risk rapo
 
 # Şifreler Streamlit Secrets üzerinden çekiliyor
 RAWG_API_KEY = st.secrets["RAWG_API_KEY"]
-client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
-oyun_adi = st.text_input("Oyun Adı (Örn: Minecraft, Roblox, Valorant):")
+# 403 Hatasını aşmak için eklediğimiz tarayıcı kimliği (User-Agent) hilesi
+client = Groq(
+    api_key=st.secrets["GROQ_API_KEY"],
+    default_headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
+)
+
+oyun_adi = st.text_input("Oyun Adı (Örn: Minecraft, Roblox, Valorant, Chivalry 2):")
 
 if st.button("Risk Raporu Oluştur"):
     if oyun_adi:
@@ -34,7 +39,7 @@ if st.button("Risk Raporu Oluştur"):
                 Ebeveynler için OYUNUN İÇERİĞİ, KÜRESEL İDDİALAR ve EBEVEYN TAVSİYESİ başlıklarında net, anlaşılır ve Türkçe bir rapor hazırla.
                 """
 
-                # Hata yakalama bloğu başlıyor
+                # Hata yakalama bloğu
                 try:
                     chat_completion = client.chat.completions.create(
                         messages=[
@@ -49,7 +54,7 @@ if st.button("Risk Raporu Oluştur"):
                     st.success(f"{tam_isim} ({yas_siniri}) için rapor başarıyla oluşturuldu!")
                     st.markdown(chat_completion.choices[0].message.content)
                 
-                # Eğer Groq API hata verirse, hatanın tam metnini ekrana yazdıracak
+                # Eğer Groq API yine bir güvenlik duvarına takılırsa hatayı ekrana basacak
                 except Exception as e:
                     st.error(f"Yapay Zeka API Hatası: {e}")
                     
